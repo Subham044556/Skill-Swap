@@ -20,6 +20,10 @@ model User {
   github        String?
   linkedin      String?
 
+  theme         String      @default("light")
+  language      String      @default("en")
+  timezone      String      @default("Asia/Kolkata")
+
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider"; // Import your custom wrapper
-
+import ThemeLoader from "@/components/ThemeLoader";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -25,9 +25,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         {/* Wrap with AuthProvider instead of SessionProvider */}
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ThemeLoader />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

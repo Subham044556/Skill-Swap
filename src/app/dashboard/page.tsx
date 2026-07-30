@@ -104,7 +104,7 @@ export default function Dashboard() {
               Profile Settings
             </a>
             <a
-              href="#"
+              href="/accountPreferences"
               className="flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 rounded-xl transition-colors"
             >
               <Settings className="w-4 h-4 text-slate-400" />
