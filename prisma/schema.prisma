@@ -3,9 +3,14 @@ generator client {
 }
 
 datasource db {
+<<<<<<< HEAD
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+=======
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+>>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
 }
 
 model User {
@@ -31,10 +36,13 @@ model User {
   accounts      Account[]
   sessions      Session[]
   userSkills    UserSkill[]
+<<<<<<< HEAD
 
   sentRequests     SwapRequest[] @relation("SentRequests")
   receivedRequests SwapRequest[] @relation("ReceivedRequests")
 
+=======
+>>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
 }
 
 model Account {
@@ -91,6 +99,7 @@ enum SkillType {
   OFFERED
   WANTED
 }
+<<<<<<< HEAD
 
 
 model SwapRequest {
@@ -103,3 +112,5 @@ model SwapRequest {
   sender   User @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
   receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
 }
+=======
+>>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842

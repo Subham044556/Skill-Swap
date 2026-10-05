@@ -11,6 +11,7 @@ import {
   LogOut,
   Bell,
   Search,
+<<<<<<< HEAD
   Zap,
   Menu,
   X,
@@ -37,11 +38,25 @@ const DEV_MOCK_USER = {
   image: "https://lh3.googleusercontent.com/a/default-user", // Or a local SVG path like "/default-avatar.png"
 };
 
+=======
+  ExternalLink,
+  ShieldCheck,
+  Zap,
+  Activity,
+  Menu,
+  X,
+  FileText,
+  Code2,
+  FolderKanban,
+} from "lucide-react";
+
+>>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+<<<<<<< HEAD
   // Suggestions state typed correctly with PartnerSuggestion
   const [suggestions, setSuggestions] = useState<PartnerSuggestion[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
@@ -128,6 +143,15 @@ export default function Dashboard() {
   };
 
   if (!isDev && status === "loading") {
+=======
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+>>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center">
         <div className="flex items-center space-x-3">
@@ -138,6 +162,7 @@ export default function Dashboard() {
     );
   }
 
+<<<<<<< HEAD
   if (!activeUser) {
     return null;
   }
@@ -148,6 +173,18 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#EDDFEF] flex font-sans text-slate-800">
+=======
+  if (!session) {
+    return null;
+  }
+
+  const userAvatar = session.user?.image || "/default-avatar.png";
+  const userName = session.user?.name || "User";
+  const userEmail = session.user?.email || "No email provided";
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-800">
+>>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
       {/* Mobile Sidebar Backdrop */}
       {isSidebarOpen && (
         <div
@@ -158,8 +195,14 @@ export default function Dashboard() {
 
       {/* Sidebar */}
       <aside
+<<<<<<< HEAD
         className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col justify-between transform transition-transform duration-200 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }`}
+=======
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col justify-between transform transition-transform duration-200 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
+>>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
       >
         <div>
           {/* Brand Header */}
@@ -255,8 +298,13 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-3">
+<<<<<<< HEAD
             <button
               aria-label="Notifications"
+=======
+            <button 
+              aria-label="Notifications" 
+>>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
               className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 relative transition-colors"
             >
               <Bell className="w-5 h-5" />
@@ -279,7 +327,11 @@ export default function Dashboard() {
         {/* Dashboard Body */}
         <main className="p-4 sm:p-8 space-y-8 max-w-7xl mx-auto w-full">
           {/* Welcome Banner */}
+<<<<<<< HEAD
           <div className="bg-gradient-to-r from-[#4C2719] to-[#3E6990] rounded-2xl p-6 sm:p-8 text-white shadow-xl shadow-indigo-600/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+=======
+          <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 rounded-2xl p-6 sm:p-8 text-white shadow-xl shadow-indigo-600/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+>>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
             <div className="space-y-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 backdrop-blur-md border border-white/10 text-indigo-100">
                 <Zap className="w-3.5 h-3.5 text-amber-300" /> Account Active
@@ -288,6 +340,7 @@ export default function Dashboard() {
                 Welcome back, {userName}!
               </h1>
               <p className="text-indigo-100/90 text-sm max-w-lg">
+<<<<<<< HEAD
                 What would you like to do today? Explore new skills, manage your profile, or check out your preferences.
               </p>
             </div>
@@ -495,6 +548,73 @@ export default function Dashboard() {
               )}
             </section>
           )}
+=======
+                Manage your account credentials, keep your profile details up to date, and explore your integrated tools.
+              </p>
+            </div>
+
+            <a
+              href="/profile"
+              className="shrink-0 bg-white hover:bg-indigo-50 text-indigo-700 font-semibold text-sm px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all duration-150 active:scale-95"
+            >
+              <span>Edit Profile</span>
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+
+          
+
+          {/* Quick Actions / Shortcuts Section */}
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              <a
+                href="/profile"
+                className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                  <User className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  Edit Public Profile
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Update your bio, college, location, and social links.
+                </p>
+              </a>
+
+              <a
+                href="/portfolio"
+                className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center mb-4 group-hover:bg-violet-600 group-hover:text-white transition-colors">
+                  <FolderKanban className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  Projects & Portfolio
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Manage featured repositories and showcased work.
+                </p>
+              </a>
+
+              <a
+                href="/accountPreferences"
+                className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mb-4 group-hover:bg-slate-800 group-hover:text-white transition-colors">
+                  <Settings className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  Account Preferences
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Configure notification triggers and security settings.
+                </p>
+              </a>
+            </div>
+          </div>
+>>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
         </main>
       </div>
     </div>
