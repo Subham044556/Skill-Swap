@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String?     @unique
+  emailVerified DateTime?
+  image         String?
+
+  bio           String?
+  college       String?
+  location      String?
+  github        String?
+  linkedin      String?
+
+  theme         String      @default("light")
+  language      String      @default("en")
+  timezone      String      @default("Asia/Kolkata")
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  userSkills    UserSkill[]
+
+  sentRequests     SwapRequest[] @relation("SentRequests")
+  receivedRequests SwapRequest[] @relation("ReceivedRequests")
+
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Skill {
+  id       String      @id @default(cuid())
+  name     String
+  category String
+  users    UserSkill[]
+}
+
+model UserSkill {
+  id      String    @id @default(cuid())
+  userId  String
+  skillId String
+  type    SkillType
+  skill   Skill     @relation(fields: [skillId], references: [id])
+  user    User      @relation(fields: [userId], references: [id])
+}
+
+enum SkillType {
+  OFFERED
+  WANTED
+}
+
+
+model SwapRequest {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  status      String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt   DateTime @default(now())
+
+  sender   User @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+}
