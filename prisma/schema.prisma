@@ -9,32 +9,26 @@ datasource db {
 }
 
 model User {
-  id            String      @id @default(cuid())
-  name          String?
-  email         String?     @unique
-  emailVerified DateTime?
-  image         String?
-
-  bio           String?
-  college       String?
-  location      String?
-  github        String?
-  linkedin      String?
-
-  theme         String      @default("light")
-  language      String      @default("en")
-  timezone      String      @default("Asia/Kolkata")
-
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  accounts      Account[]
-  sessions      Session[]
-  userSkills    UserSkill[]
-
-  sentRequests     SwapRequest[] @relation("SentRequests")
+  id               String        @id @default(cuid())
+  name             String?
+  email            String?       @unique
+  emailVerified    DateTime?
+  image            String?
+  bio              String?
+  location         String?
+  github           String?
+  linkedin         String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  college          String?
+  theme            String        @default("light")
+  language         String        @default("en")
+  timezone         String        @default("Asia/Kolkata")
+  accounts         Account[]
+  sessions         Session[]
   receivedRequests SwapRequest[] @relation("ReceivedRequests")
-
+  sentRequests     SwapRequest[] @relation("SentRequests")
+  userSkills       UserSkill[]
 }
 
 model Account {
@@ -87,19 +81,17 @@ model UserSkill {
   user    User      @relation(fields: [userId], references: [id])
 }
 
+model SwapRequest {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  receiver   User     @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender     User     @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+}
+
 enum SkillType {
   OFFERED
   WANTED
-}
-
-
-model SwapRequest {
-  id          String   @id @default(cuid())
-  senderId    String
-  receiverId  String
-  status      String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
-  createdAt   DateTime @default(now())
-
-  sender   User @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
 }
