@@ -1,7 +1,6 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-<<<<<<< HEAD
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -94,26 +93,6 @@ export default function LoginPage() {
           className="w-full py-2.5 border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-lg text-sm flex items-center justify-center gap-2 transition-colors"
         >
           <span>Continue with Google</span>
-=======
-
-export default function LoginPage() {
-  return (
-    <main className="flex min-h-screen items-center justify-center">
-      <div className="rounded-xl border p-10 shadow-lg">
-        <h1 className="text-3xl font-bold mb-8">
-          Welcome to SkillX
-        </h1>
-
-        <button
-          onClick={() =>
-            signIn("google", {
-              callbackUrl: "/dashboard",
-            })
-          }
-          className="rounded-lg bg-blue-600 px-6 py-3 text-white"
-        >
-          Continue with Google
->>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
         </button>
       </div>
     </main>

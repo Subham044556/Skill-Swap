@@ -91,7 +91,6 @@ enum SkillType {
   OFFERED
   WANTED
 }
-<<<<<<< HEAD
 
 
 model SwapRequest {
@@ -104,5 +103,3 @@ model SwapRequest {
   sender   User @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
   receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
 }
-=======
->>>>>>> 6fca2efe2925b1c104dd98e724099178d71bc842
