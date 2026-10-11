@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link"; // Added import
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -54,7 +55,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@skillswap.com"
               required
-              className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-indigo-600"
+              className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 focus:outline-none focus:border-indigo-600"
             />
           </div>
 
@@ -94,6 +95,17 @@ export default function LoginPage() {
         >
           <span>Continue with Google</span>
         </button>
+
+        {/* --- SIGN UP LINK HERE --- */}
+        <p className="mt-6 text-center text-xs text-slate-500">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/signup"
+            className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors"
+          >
+            Create an account
+          </Link>
+        </p>
       </div>
     </main>
   );

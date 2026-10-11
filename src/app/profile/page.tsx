@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { User, GraduationCap, MapPin, Camera, ArrowRight } from "lucide-react";
+import { Menu, Mail ,Save , ArrowLeft, User, GraduationCap, MapPin, Camera, ArrowRight } from "lucide-react";
+import Sidebar from "@/components/Sidebar";
+
 
 // 2. Use these inline SVG components in your layout:
 const Github = (props: React.SVGProps<SVGSVGElement>) => (
@@ -19,6 +21,7 @@ const Linkedin = (props: React.SVGProps<SVGSVGElement>) => (
 // 1. Local state for form inputs
 
 export default function ProfilePage() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [editing, setEditing] = useState(true);
@@ -30,7 +33,7 @@ export default function ProfilePage() {
     location: "",
     github: "",
     linkedin: "",
-    theme:"light",
+    theme: "light",
   });
 
   useEffect(() => {
@@ -125,227 +128,308 @@ export default function ProfilePage() {
     }
   };
 
-  if (profile && !editing) {
-    return (
-      <main className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-xl">
-          <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center">
-              <User className="w-10 h-10 text-indigo-600" />
-            </div>
-
-            <div>
-              <h1 className="text-3xl  text-black font-bold">{profile.name}</h1>
-
-              <p className="text-black">{profile.email}</p>
-            </div>
-          </div>
-
-          <div className="mt-8 space-y-4 text-black">
-            <div>
-              <h3 className="font-semibold">Bio</h3>
-              <p className="text-black">{profile.bio || "-"}</p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold">College</h3>
-              <p className="text-black">{profile.college || "-"}</p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold">Location</h3>
-              <p className="text-black">{profile.location || "-"}</p>
-            </div>
-
-            <div>
-              <h3 className=" text-black font-bold">Github</h3>
-              <p className="text-black">{profile.github || "-"}</p>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-blue-800">LinkedIn</h3>
-              <p className="text-black">{profile.linkedin || "-"}</p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setEditing(true)}
-            className="mt-8 w-full rounded-xl bg-indigo-600 py-3 text-white hover:bg-indigo-700"
-          >
-            Edit Profile
-          </button>
-        </div>
-      </main>
-    );
-  }
-
+ // Unified return statement with Sidebar + Mobile Header
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 font-sans">
-      <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
-        {/* Header Banner */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 h-28 relative">
-          <div className="absolute -bottom-10 left-8">
-            <div className="relative group">
-              <div className="w-20 h-20 rounded-full bg-slate-100 border-4 border-white shadow-md flex items-center justify-center text-slate-400 overflow-hidden">
-                <User className="w-10 h-10" />
-              </div>
-              <button
-                type="button"
-                aria-label="Upload photo"
-                className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white"
-              >
-                <Camera className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#EDDFEF] flex font-sans text-slate-800">
+      {/* 1. Reusable Sidebar (Desktop permanent, Mobile slide-out) */}
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
-        {/* Form Body */}
-        <div className="pt-14 p-8">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-slate-900">
-              Complete Your Profile
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Set up your public details so peers and recruiters can get to know
-              you.
-            </p>
-          </div>
+      {/* 2. Main Content Wrapper */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile Header Bar (Only visible on small screens) */}
+        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between lg:hidden sticky top-0 z-30">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <span className="font-bold text-slate-900 text-base">
+            Profile Settings
+          </span>
+          <div className="w-9" />
+        </header>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Bio Field */}
-            <div>
-              <label
-                htmlFor="bio"
-                className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
-              >
-                Bio
-              </label>
-              <textarea
-                id="bio"
-                rows={3}
-                value={formData.bio}
-                onChange={handleChange}
-                placeholder="Tell us a bit about yourself, your tech stack, or what you're working on..."
-                className="w-full rounded-xl border border-slate-200 p-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition duration-200 resize-none"
-              />
-            </div>
-
-            {/* College & Location Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="college"
-                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
-                >
-                  College / University
-                </label>
-                <div className="relative">
-                  <GraduationCap className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    id="college"
-                    type="text"
-                    value={formData.college}
-                    onChange={handleChange}
-                    placeholder="e.g. NIT Rourkela"
-                    className="w-full rounded-xl border border-slate-200 pl-11 pr-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition duration-200"
-                  />
+        {/* 3. Page Body */}
+        <main className="p-4 sm:p-8 flex items-center justify-center min-h-[calc(100vh-4rem)] lg:min-h-screen">
+          {profile && !editing ? (
+            /* ================= VIEW MODE CARD ================= */
+            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-8 w-full max-w-xl">
+              <div className="flex items-center gap-5">
+                <div className="w-20 h-20 rounded-full bg-indigo-50 border-2 border-indigo-100 flex items-center justify-center shrink-0">
+                  <User className="w-10 h-10 text-indigo-600" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-900">
+                    {profile.name}
+                  </h1>
+                  <p className="text-sm text-slate-500">{profile.email}</p>
                 </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="location"
-                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
-                >
-                  Location
-                </label>
-                <div className="relative">
-                  <MapPin className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    id="location"
-                    type="text"
-                    value={formData.location}
-                    onChange={handleChange}
-                    placeholder="e.g. Bangalore, India"
-                    className="w-full rounded-xl border border-slate-200 pl-11 pr-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition duration-200"
-                  />
+              <div className="mt-8 space-y-4 text-slate-700">
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                  <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                    Bio
+                  </h3>
+                  <p className="text-sm text-slate-800">{profile.bio || "No bio added yet."}</p>
                 </div>
-              </div>
-            </div>
 
-            {/* GitHub Field */}
-            <div>
-              <label
-                htmlFor="github"
-                className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
-              >
-                GitHub Profile
-              </label>
-              <div className="relative flex rounded-xl border border-slate-200 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition duration-200 overflow-hidden">
-                <div className="bg-slate-50 border-r border-slate-200 px-3.5 flex items-center gap-2 text-slate-500 text-sm font-medium">
-                  <Github className="w-4 h-4 text-slate-700" />
-                  <span>github.com/</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      College
+                    </h3>
+                    <p className="text-sm font-medium text-slate-800">
+                      {profile.college || "—"}
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                      Location
+                    </h3>
+                    <p className="text-sm font-medium text-slate-800">
+                      {profile.location || "—"}
+                    </p>
+                  </div>
                 </div>
-                <input
-                  id="github"
-                  type="text"
-                  value={formData.github}
-                  onChange={handleChange}
-                  placeholder="username"
-                  className="w-full px-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
-                />
-              </div>
-            </div>
 
-            {/* LinkedIn Field */}
-            <div>
-              <label
-                htmlFor="linkedin"
-                className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
-              >
-                LinkedIn Profile
-              </label>
-              <div className="relative flex rounded-xl border border-slate-200 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition duration-200 overflow-hidden">
-                <div className="bg-slate-50 border-r border-slate-200 px-3.5 flex items-center gap-2 text-slate-500 text-sm font-medium">
-                  <Linkedin className="w-4 h-4 text-blue-600" />
-                  <span>linkedin.com/in/</span>
-                </div>
-                <input
-                  id="linkedin"
-                  type="text"
-                  value={formData.linkedin}
-                  onChange={handleChange}
-                  placeholder="username"
-                  className="w-full px-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-medium rounded-xl py-3.5 px-4 shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 transition duration-200"
-              >
-                {isLoading ? (
-                  <span>Saving...</span>
-                ) : (
-                  <>
-                    <span>Save Profile</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
+                {(profile.github || profile.linkedin) && (
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      Connected Socials
+                    </h3>
+                    <div className="flex items-center gap-3">
+                      {profile.github && (
+                        <a
+                          href={
+                            profile.github.startsWith("http")
+                              ? profile.github
+                              : `https://github.com/${profile.github}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="GitHub Profile"
+                          className="p-1.5 rounded-lg text-slate-700 hover:text-black hover:bg-slate-200/60 transition-colors"
+                        >
+                          <Github className="w-5 h-5" />
+                        </a>
+                      )}
+                      {profile.linkedin && (
+                        <a
+                          href={
+                            profile.linkedin.startsWith("http")
+                              ? profile.linkedin
+                              : `https://linkedin.com/in/${profile.linkedin}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="LinkedIn Profile"
+                          className="p-1.5 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                        >
+                          <Linkedin className="w-5 h-5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 )}
+              </div>
+
+              <button
+                onClick={() => setEditing(true)}
+                className="mt-8 w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold text-sm hover:bg-indigo-700 transition shadow-md shadow-indigo-600/20 active:scale-[0.99]"
+              >
+                Edit Profile
               </button>
-              {isSaved && (
-                <p className="mt-4 text-center text-green-600 font-medium">
-                  ✅ Profile saved successfully!
-                </p>
-              )}
             </div>
-          </form>
-        </div>
+          ) : (
+            /* ================= EDIT MODE FORM ================= */
+            <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 overflow-hidden">
+              {/* Header Banner */}
+              <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 h-28 relative">
+                <div className="absolute -bottom-10 left-8">
+                  <div className="relative group">
+                    <div className="w-20 h-20 rounded-full bg-slate-100 border-4 border-white shadow-md flex items-center justify-center text-slate-400 overflow-hidden">
+                      <User className="w-10 h-10" />
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Upload photo"
+                      className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white"
+                    >
+                      <Camera className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Body */}
+              <div className="pt-14 p-8">
+                <div className="mb-6 flex items-start justify-between">
+                  <div>
+                    <h1 className="text-2xl font-bold text-slate-900">
+                      Edit Profile
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Update your public details for peer skill exchanges.
+                    </p>
+                  </div>
+                  {profile && (
+                    <button
+                      type="button"
+                      onClick={() => setEditing(false)}
+                      className="text-xs font-semibold text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Bio Field */}
+                  <div>
+                    <label
+                      htmlFor="bio"
+                      className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
+                    >
+                      Bio
+                    </label>
+                    <textarea
+                      id="bio"
+                      rows={3}
+                      value={formData.bio}
+                      onChange={handleChange}
+                      placeholder="Tell us a bit about yourself, your skills, or what you're learning..."
+                      className="w-full rounded-xl border border-slate-200 p-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition duration-200 resize-none"
+                    />
+                  </div>
+
+                  {/* College & Location */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="college"
+                        className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
+                      >
+                        College / University
+                      </label>
+                      <div className="relative">
+                        <GraduationCap className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          id="college"
+                          type="text"
+                          value={formData.college}
+                          onChange={handleChange}
+                          placeholder="e.g. NIT Rourkela"
+                          className="w-full rounded-xl border border-slate-200 pl-11 pr-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition duration-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="location"
+                        className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
+                      >
+                        Location
+                      </label>
+                      <div className="relative">
+                        <MapPin className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          id="location"
+                          type="text"
+                          value={formData.location}
+                          onChange={handleChange}
+                          placeholder="e.g. Rourkela, India"
+                          className="w-full rounded-xl border border-slate-200 pl-11 pr-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition duration-200"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* GitHub Profile */}
+                  <div>
+                    <label
+                      htmlFor="github"
+                      className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
+                    >
+                      GitHub Profile
+                    </label>
+                    <div className="relative flex rounded-xl border border-slate-200 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition duration-200 overflow-hidden">
+                      <div className="bg-slate-50 border-r border-slate-200 px-3.5 flex items-center gap-2 text-slate-500 text-sm font-medium">
+                        <Github className="w-4 h-4 text-slate-700" />
+                        <span>github.com/</span>
+                      </div>
+                      <input
+                        id="github"
+                        type="text"
+                        value={formData.github}
+                        onChange={handleChange}
+                        placeholder="username"
+                        className="w-full px-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* LinkedIn Profile */}
+                  <div>
+                    <label
+                      htmlFor="linkedin"
+                      className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2"
+                    >
+                      LinkedIn Profile
+                    </label>
+                    <div className="relative flex rounded-xl border border-slate-200 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition duration-200 overflow-hidden">
+                      <div className="bg-slate-50 border-r border-slate-200 px-3.5 flex items-center gap-2 text-slate-500 text-sm font-medium">
+                        <Linkedin className="w-4 h-4 text-blue-600" />
+                        <span>linkedin.com/in/</span>
+                      </div>
+                      <input
+                        id="linkedin"
+                        type="text"
+                        value={formData.linkedin}
+                        onChange={handleChange}
+                        placeholder="username"
+                        className="w-full px-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-medium rounded-xl py-3.5 px-4 shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 transition duration-200 disabled:opacity-75"
+                    >
+                      {isLoading ? (
+                        <span>Saving...</span>
+                      ) : (
+                        <>
+                          <span>Save Profile</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                    {isSaved && (
+                      <p className="mt-4 text-center text-emerald-600 text-sm font-semibold">
+                        ✓ Profile saved successfully!
+                      </p>
+                    )}
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </main>
       </div>
-    </main>
+    </div>
   );
+
+ 
 }
