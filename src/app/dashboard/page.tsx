@@ -63,6 +63,9 @@ export default function Dashboard() {
   // Wanted skills state
   const [myWantedSkills, setMyWantedSkills] = useState<WantedSkillItem[]>([]);
   const [addingSkillName, setAddingSkillName] = useState<string | null>(null);
+  
+  const [isSavingPreferences, setIsSavingPreferences] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const isDev = process.env.NODE_ENV === "development";
 
@@ -106,7 +109,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadWantedSkills() {
       try {
-        const res = await fetch("/api/preferences");
+        const res = await fetch("/api/skillPreferences");
         if (res.ok) {
           const data = await res.json();
           setMyWantedSkills(data.wantedSkills || []);
@@ -139,7 +142,7 @@ export default function Dashboard() {
     setMyWantedSkills((prev) => [...prev, newSkillItem]);
 
     try {
-      const res = await fetch("/api/preferences", {
+      const res = await fetch("/api/skillPreferences", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ skillName, category }),
@@ -161,7 +164,7 @@ export default function Dashboard() {
   const handleRemoveWantedSkill = async (skillName: string) => {
     setMyWantedSkills((prev) => prev.filter((s) => s.name !== skillName));
     try {
-      await fetch("/api/preferences", {
+      await fetch("/api/skillPreferences", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ skillName }),
@@ -194,6 +197,41 @@ export default function Dashboard() {
       setIsLoadingSuggestions(false);
     }
   };
+
+  // Function to sync all currently tracked wanted skills directly to preferences
+const handleSaveAllWantedSkills = async () => {
+  if (myWantedSkills.length === 0) return;
+
+  setIsSavingPreferences(true);
+  setSaveSuccess(false);
+
+  try {
+    const res = await fetch("/api/skillPreferences", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        // Hits Case 1 in your route (batch array save)
+        skills: myWantedSkills.map((s) => ({
+          name: s.name,
+          category: s.category || "General",
+        })),
+      }),
+    });
+
+    if (res.ok) {
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || "Failed to sync preferences");
+    }
+  } catch (error) {
+    console.error("Failed to save preferences:", error);
+    alert("An error occurred while saving.");
+  } finally {
+    setIsSavingPreferences(false);
+  }
+};
 
   // Function to send a swap request
   const handleSendRequest = async (receiverId: string) => {
@@ -347,56 +385,83 @@ export default function Dashboard() {
 
           {/* My Wanted Skills Shelf Section */}
           <section className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-indigo-600" />
-                <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                  My Wanted Skills
-                </h2>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
-                  {myWantedSkills.length}
-                </span>
-              </div>
-              <span className="text-xs text-slate-400">
-                Skills you are looking to learn
-              </span>
-            </div>
+  {/* Header with Title and Save Button */}
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+    <div className="flex items-center gap-2">
+      <BookOpen className="w-5 h-5 text-indigo-600" />
+      <h2 className="text-base sm:text-lg font-bold text-slate-900">
+        My Wanted Skills
+      </h2>
+      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
+        {myWantedSkills.length}
+      </span>
+      <span className="text-xs text-slate-400 hidden sm:inline ml-2">
+        • Skills you are looking to learn
+      </span>
+    </div>
 
-            {myWantedSkills.length === 0 ? (
-              <div className="p-6 border border-dashed border-slate-200 rounded-xl text-center">
-                <p className="text-xs sm:text-sm text-slate-500">
-                  You haven&apos;t added any wanted skills yet. Click{" "}
-                  <span className="font-semibold text-slate-700">
-                    &quot;Add to Wanted Skills +&quot;
-                  </span>{" "}
-                  on any card below to track it here!
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2.5">
-                {myWantedSkills.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-indigo-100 bg-indigo-50/70 hover:bg-indigo-50 hover:border-indigo-200 transition-colors"
-                  >
-                    <span className="text-xs font-semibold text-indigo-950">
-                      {skill.name}
-                    </span>
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white text-indigo-600 border border-indigo-100">
-                      {skill.category}
-                    </span>
-                    <button
-                      onClick={() => handleRemoveWantedSkill(skill.name)}
-                      title="Remove skill"
-                      className="text-indigo-400 hover:text-rose-600 transition-colors p-0.5 rounded"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+    {/* Save Action Area */}
+    <div className="flex items-center gap-3 self-end sm:self-auto">
+      {saveSuccess && (
+        <span className="text-xs font-semibold text-emerald-600 animate-pulse">
+          Saved to Preferences ✓
+        </span>
+      )}
+      <button
+        type="button"
+        onClick={handleSaveAllWantedSkills}
+        disabled={isSavingPreferences || myWantedSkills.length === 0}
+        className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold text-xs rounded-xl shadow-sm transition-all duration-150 flex items-center gap-1.5 active:scale-95 disabled:cursor-not-allowed"
+      >
+        {isSavingPreferences ? (
+          <>
+            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            <span>Saving...</span>
+          </>
+        ) : (
+          <span>Save to Preferences</span>
+        )}
+      </button>
+    </div>
+  </div>
+
+  {/* Empty State or Skills List */}
+  {myWantedSkills.length === 0 ? (
+    <div className="p-6 border border-dashed border-slate-200 rounded-xl text-center">
+      <p className="text-xs sm:text-sm text-slate-500">
+        You haven&apos;t added any wanted skills yet. Click{" "}
+        <span className="font-semibold text-slate-700">
+          &quot;Add to Wanted Skills +&quot;
+        </span>{" "}
+        on any card below to track it here!
+      </p>
+    </div>
+  ) : (
+    <div className="flex flex-wrap gap-2.5">
+      {myWantedSkills.map((skill) => (
+        <div
+          key={skill.id}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-indigo-100 bg-indigo-50/70 hover:bg-indigo-50 hover:border-indigo-200 transition-colors"
+        >
+          <span className="text-xs font-semibold text-indigo-950">
+            {skill.name}
+          </span>
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white text-indigo-600 border border-indigo-100">
+            {skill.category}
+          </span>
+          <button
+            type="button"
+            onClick={() => handleRemoveWantedSkill(skill.name)}
+            title="Remove skill"
+            className="text-indigo-400 hover:text-rose-600 transition-colors p-0.5 rounded"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
 
           {/* Dynamic Suggestions Section */}
           {showSuggestions && (
@@ -446,7 +511,7 @@ export default function Dashboard() {
                 /* Real Suggestions Grid */
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {suggestions.map((item: any) => {
-                    const skillTitle = item.skillName || item.skillOffered;
+                    const skillTitle = item.skillName || item.skillOffered || item.name || item.title || "";
                     const isAlreadyWanted = myWantedSkills.some(
                       (s) => s.name.toLowerCase() === skillTitle?.toLowerCase()
                     );

@@ -80,6 +80,8 @@ model UserSkill {
   type    SkillType
   skill   Skill     @relation(fields: [skillId], references: [id])
   user    User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, skillId,type])
 }
 
 model SwapRequest {

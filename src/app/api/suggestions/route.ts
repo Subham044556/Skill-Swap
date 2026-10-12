@@ -70,19 +70,8 @@ const SKILL_POOL = [
   { name: "Chess Strategy & Opening Tactics", category: "Games", bio: "Master board control, tactical pins, forks, endgame checkmate patterns, and opening principles." },
   { name: "Rubik's Cube Speedcubing (CFOP Method)", category: "Hobbies", bio: "Learn cross formation, F2L pairs, OLL algorithms, and PLL solves under 30 seconds." },
   { name: "Creative Writing & Fiction Worldbuilding", category: "Creative", bio: "Develop memorable character arcs, narrative pacing, dialogue rhythm, and fantasy settings." },
-  { name: "Podcast Production & Audio Engineering", category: "Media", bio: "Set up condenser microphones, remove background noise in Audacity, and host episodes." }
+  { name: "Podcast Production & Audio Engineering", category: "Media", bio: "Set up condenser microphones, remove background noise in Audacity, and host episodes." },
 ];
-
-// Fisher-Yates shuffle algorithm for unbiased randomness
-function getRandomSkills<T>(array: T[], count: number): T[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled.slice(0, count);
-}
-
 
 function getRandomSample<T>(array: T[], count: number): T[] {
   const shuffled = [...array];
@@ -120,26 +109,31 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // 1. RANDOM TOPICS MODE
     if (mode === "random") {
       const selectedSkills = getRandomSample(SKILL_POOL, 6);
-
       const skillSuggestions = selectedSkills.map((skill, index) => ({
         id: `skill-topic-${Date.now()}-${index}`,
         skillName: skill.name,
         category: skill.category,
         description: skill.bio,
         available: true,
-        isTopic: true, // Flag used by Dashboard UI to render topic cards
+        isTopic: true,
       }));
 
       return NextResponse.json({ suggestions: skillSuggestions });
     }
 
+    // Extract current user's skill IDs
     const wantedSkillIds = currentUser.userSkills
       .filter((us) => us.type === "WANTED")
       .map((us) => us.skillId);
 
-    // MODE: MATCHED ONLY (Only query DB for users offering what current user wants)
+    const offeredSkillIds = currentUser.userSkills
+      .filter((us) => us.type === "OFFERED")
+      .map((us) => us.skillId);
+
+    // 2. MATCHED MODE (Weighted Reciprocal Engine)
     if (mode === "matched") {
       if (wantedSkillIds.length === 0) {
         return NextResponse.json({
@@ -148,7 +142,8 @@ export async function GET(req: Request) {
         });
       }
 
-      const matchedUsers = await prisma.user.findMany({
+      // Query candidate users offering what current user wants
+      const candidateUsers = await prisma.user.findMany({
         where: {
           id: { not: currentUser.id },
           userSkills: {
@@ -163,33 +158,57 @@ export async function GET(req: Request) {
             include: { skill: true },
           },
         },
-        take: 12,
+        take: 20,
       });
 
-      const matchedSuggestions = matchedUsers.map((partner) => {
-        const offeredSkill = partner.userSkills.find(
-          (us) => us.type === "OFFERED" && wantedSkillIds.includes(us.skillId)
-        )?.skill;
+      // Score candidates on reciprocity
+      const scoredMatches = candidateUsers.map((partner) => {
+        const partnerOffers = partner.userSkills
+          .filter((us) => us.type === "OFFERED")
+          .map((us) => us.skill);
+
+        const partnerWants = partner.userSkills
+          .filter((us) => us.type === "WANTED")
+          .map((us) => us.skill);
+
+        // Find primary matching skill they teach that I want
+        const matchedOffered = partnerOffers.find((s) =>
+          wantedSkillIds.includes(s.id)
+        );
+
+        // Check if partner wants any skill I offer
+        const reciprocalSkill = partnerWants.find((s) =>
+          offeredSkillIds.includes(s.id)
+        );
+
+        const isMutual = Boolean(reciprocalSkill);
 
         return {
           id: partner.id,
           partnerName: partner.name || "Anonymous Swapper",
           partnerImage: partner.image,
-          skillOffered: offeredSkill?.name || "General Skill",
-          category: offeredSkill?.category || "General",
-          matchScore: "100% Interest Match",
-          description: partner.bio || `${partner.name || "This user"} is offering ${offeredSkill?.name || "a skill"}!`,
+          skillOffered: matchedOffered?.name || "General Skill",
+          category: matchedOffered?.category || "General",
+          wantsFromYou: reciprocalSkill?.name || null,
+          matchScore: isMutual ? "98% Mutual Match" : "75% Skill Match",
+          priority: isMutual ? 2 : 1, // Mutual matches rank highest
+          description: partner.bio || (isMutual
+            ? `Wants to learn ${reciprocalSkill?.name} in exchange for ${matchedOffered?.name}!`
+            : `Offering ${matchedOffered?.name}.`),
           available: true,
         };
       });
 
-      return NextResponse.json({ suggestions: matchedSuggestions });
+      // Sort: highest priority (mutual matches) first
+      scoredMatches.sort((a, b) => b.priority - a.priority);
+
+      return NextResponse.json({ suggestions: scoredMatches });
     }
 
-    // MODE: RANDOM / DEFAULT (Queries DB + fills with random 50-skill pool)
+    // 3. DEFAULT / MIXED MODE
     let dbSuggestions: any[] = [];
     if (wantedSkillIds.length > 0) {
-      const matchedUsers = await prisma.user.findMany({
+      const candidateUsers = await prisma.user.findMany({
         where: {
           id: { not: currentUser.id },
           userSkills: {
@@ -205,10 +224,16 @@ export async function GET(req: Request) {
         take: 10,
       });
 
-      const formattedMatches = matchedUsers.map((partner) => {
+      dbSuggestions = candidateUsers.map((partner) => {
         const offeredSkill = partner.userSkills.find(
           (us) => us.type === "OFFERED" && wantedSkillIds.includes(us.skillId)
         )?.skill;
+
+        const reciprocalSkill = partner.userSkills.find(
+          (us) => us.type === "WANTED" && offeredSkillIds.includes(us.skillId)
+        )?.skill;
+
+        const isMutual = Boolean(reciprocalSkill);
 
         return {
           id: partner.id,
@@ -216,29 +241,29 @@ export async function GET(req: Request) {
           partnerImage: partner.image,
           skillOffered: offeredSkill?.name || "General Skill",
           category: offeredSkill?.category || "General",
-          matchScore: "Direct Match",
-          description: partner.bio || `${partner.name || "This user"} is offering ${offeredSkill?.name || "a skill"}!`,
+          wantsFromYou: reciprocalSkill?.name || null,
+          matchScore: isMutual ? "Mutual Swap" : "Skill Match",
+          description: partner.bio || `Offering ${offeredSkill?.name}.`,
           available: true,
         };
       });
-
-      dbSuggestions = getRandomSample(formattedMatches, 6);
     }
 
-    const neededFallbackCount = 6 - dbSuggestions.length;
+    const neededFallbackCount = Math.max(0, 6 - dbSuggestions.length);
     let fallbackSuggestions: any[] = [];
 
     if (neededFallbackCount > 0) {
       const selectedSkills = getRandomSample(SKILL_POOL, neededFallbackCount);
       fallbackSuggestions = selectedSkills.map((skill, index) => ({
         id: `random-skill-${Date.now()}-${index}`,
-        partnerName: "Community Instructor",
+        partnerName: "Community Topic",
         partnerImage: null,
         skillOffered: skill.name,
         category: skill.category,
         matchScore: "Explore Topic",
         description: skill.bio,
         available: true,
+        isTopic: true,
       }));
     }
 

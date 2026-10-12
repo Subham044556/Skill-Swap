@@ -31,7 +31,7 @@ export default function AccountPreferencesPage() {
   useEffect(() => {
     async function loadSkills() {
       try {
-        const res = await fetch("/api/preferences");
+        const res = await fetch("/api/skillPreferences");
         if (res.ok) {
           const data = await res.json();
           setSkills(data.skills || []);
@@ -50,7 +50,7 @@ export default function AccountPreferencesPage() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/preferences", {
+      const res = await fetch("/api/skillPreferences", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -78,7 +78,7 @@ export default function AccountPreferencesPage() {
   const handleRemoveSkill = async (id: string, name: string, type: string) => {
     setSkills((prev) => prev.filter((s) => s.id !== id));
     try {
-      await fetch("/api/preferences", {
+      await fetch("/api/skillPreferences", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ skillName: name, type }),

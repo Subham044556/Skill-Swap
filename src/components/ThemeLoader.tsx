@@ -6,7 +6,7 @@ export default function ThemeLoader() {
   useEffect(() => {
     async function loadTheme() {
       try {
-        const res = await fetch("/api/preferences");
+        const res = await fetch("/api/settings_app");
 
         if (!res.ok) return;
 
